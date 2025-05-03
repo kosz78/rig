@@ -208,7 +208,7 @@ pub async fn send_compatible_streaming_request(
                 continue;
             };
 
-            println!("{id} {name}");
+            //println!("{id} {name}");
 
             yield Ok(RawStreamingChoice::ToolCall {id, name, arguments});
         }
