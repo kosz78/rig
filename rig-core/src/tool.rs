@@ -280,8 +280,8 @@ where
             if result.is_error.unwrap_or(false) {
                 if let Some(error) = result.content.first() {
                     match error {
-                        mcp_core::types::ToolResponseContent::Text { text } => {
-                            return Err(McpToolError(text.clone()).into());
+                        mcp_core::types::ToolResponseContent::Text(text) => {
+                            return Err(McpToolError(text.text.clone()).into());
                         }
                         _ => return Err(McpToolError("Unsuppported error type".to_string()).into()),
                     }
@@ -294,16 +294,17 @@ where
                 .content
                 .into_iter()
                 .map(|c| match c {
-                    mcp_core::types::ToolResponseContent::Text { text } => text,
-                    mcp_core::types::ToolResponseContent::Image { data, mime_type } => {
-                        format!("data:{};base64,{}", mime_type, data)
+                    mcp_core::types::ToolResponseContent::Text(text) => text.text,
+                    mcp_core::types::ToolResponseContent::Image(image) => {
+                        format!("data:{};base64,{}", image.mime_type, image.data)
                     }
-                    mcp_core::types::ToolResponseContent::Audio { data, mime_type } => {
-                        format!("data:{};base64,{}", mime_type, data)
+                    mcp_core::types::ToolResponseContent::Audio(audio) => {
+                        format!("data:{};base64,{}", audio.mime_type, audio.data)
                     }
-                    mcp_core::types::ToolResponseContent::Resource {
-                        resource: mcp_core::types::ResourceContents { uri, mime_type },
-                    } => {
+                    mcp_core::types::ToolResponseContent::Resource(mcp_core::types::EmbeddedResource {
+                        resource: mcp_core::types::ResourceContents { uri, mime_type, .. },
+                        ..
+                    }) => {
                         format!(
                             "{}{}",
                             mime_type
