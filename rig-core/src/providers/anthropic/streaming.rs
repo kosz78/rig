@@ -81,7 +81,7 @@ pub struct StreamingCompletionResponse {
 }
 
 impl StreamingCompletionModel for CompletionModel {
-    type StreamingResponse = StreamingCompletionResponse;
+    type StreamingResponse = crate::providers::openai::streaming::StreamingCompletionResponse;
     async fn stream(
         &self,
         completion_request: CompletionRequest,
@@ -174,10 +174,12 @@ impl StreamingCompletionModel for CompletionModel {
                                     StreamingEvent::MessageDelta { delta, usage } => {
                                         if delta.stop_reason.is_some() {
 
-                                            yield Ok(RawStreamingChoice::FinalResponse(StreamingCompletionResponse {
-                                                usage: PartialUsage {
-                                                    output_tokens: usage.output_tokens,
-                                                    input_tokens: Some(input_tokens.try_into().expect("Failed to convert input_tokens to usize")),
+                                            yield Ok(RawStreamingChoice::FinalResponse(Self::StreamingResponse {
+                                                usage: crate::providers::openai::client::Usage {
+                                                    total_tokens: usage.output_tokens,
+                                                    prompt_tokens: input_tokens as usize,
+
+                                                    //input_tokens: Some(input_tokens.try_into().expect("Failed to convert input_tokens to usize")),
                                                 }
                                             }))
                                         }
@@ -213,7 +215,7 @@ impl StreamingCompletionModel for CompletionModel {
 fn handle_event(
     event: &StreamingEvent,
     current_tool_call: &mut Option<ToolCallState>,
-) -> Option<Result<RawStreamingChoice<StreamingCompletionResponse>, CompletionError>> {
+) -> Option<Result<RawStreamingChoice<crate::providers::openai::streaming::StreamingCompletionResponse>, CompletionError>> {
     match event {
         StreamingEvent::ContentBlockDelta { delta, .. } => match delta {
             ContentDelta::TextDelta { text } => {
