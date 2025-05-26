@@ -176,7 +176,7 @@ impl StreamingCompletionModel for CompletionModel {
 
                                             yield Ok(RawStreamingChoice::FinalResponse(Self::StreamingResponse {
                                                 usage: crate::providers::openai::client::Usage {
-                                                    total_tokens: usage.output_tokens,
+                                                    total_tokens: input_tokens as usize + usage.output_tokens as usize,
                                                     prompt_tokens: input_tokens as usize,
 
                                                     //input_tokens: Some(input_tokens.try_into().expect("Failed to convert input_tokens to usize")),
@@ -215,7 +215,12 @@ impl StreamingCompletionModel for CompletionModel {
 fn handle_event(
     event: &StreamingEvent,
     current_tool_call: &mut Option<ToolCallState>,
-) -> Option<Result<RawStreamingChoice<crate::providers::openai::streaming::StreamingCompletionResponse>, CompletionError>> {
+) -> Option<
+    Result<
+        RawStreamingChoice<crate::providers::openai::streaming::StreamingCompletionResponse>,
+        CompletionError,
+    >,
+> {
     match event {
         StreamingEvent::ContentBlockDelta { delta, .. } => match delta {
             ContentDelta::TextDelta { text } => {
