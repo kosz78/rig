@@ -301,16 +301,12 @@ where
                     mcp_core::types::ToolResponseContent::Audio(audio) => {
                         format!("data:{};base64,{}", audio.mime_type, audio.data)
                     }
-                    mcp_core::types::ToolResponseContent::Resource(mcp_core::types::EmbeddedResource {
-                        resource: mcp_core::types::ResourceContents { uri, mime_type, .. },
-                        ..
-                    }) => {
+                    mcp_core::types::ToolResponseContent::Resource(
+                        mcp_core::types::EmbeddedResource { resource, .. },
+                    ) => {
                         format!(
-                            "{}{}",
-                            mime_type
-                                .map(|m| format!("data:{};", m))
-                                .unwrap_or_default(),
-                            uri
+                            "resource:{}",
+                            serde_json::to_string(&resource).unwrap_or_default(),
                         )
                     }
                 })
