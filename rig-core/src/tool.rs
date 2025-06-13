@@ -296,10 +296,10 @@ where
                 .map(|c| match c {
                     mcp_core::types::ToolResponseContent::Text(text) => text.text,
                     mcp_core::types::ToolResponseContent::Image(image) => {
-                        format!("data:{};base64,{}", image.mime_type, image.data)
+                        format!("image-data:{};base64,{}", image.mime_type, image.data)
                     }
                     mcp_core::types::ToolResponseContent::Audio(audio) => {
-                        format!("data:{};base64,{}", audio.mime_type, audio.data)
+                        format!("audio-data:{};base64,{}", audio.mime_type, audio.data)
                     }
                     mcp_core::types::ToolResponseContent::Resource(
                         mcp_core::types::EmbeddedResource { resource, .. },
@@ -311,7 +311,7 @@ where
                     }
                 })
                 .collect::<Vec<_>>()
-                .join(""))
+                .join("|"))
         })
     }
 }
